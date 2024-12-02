@@ -1,4 +1,4 @@
-package day2
+package main
 
 import (
 	"reflect"
@@ -33,16 +33,26 @@ func TestPairIntsOddCount(t *testing.T) {
 	}
 }
 
-func TestSafeLevel(t *testing.T) {
-	var SafeLevel = []int{7, 6, 4, 2, 1}
+var safelevelstests = map[string]struct {
+	in  []int
+	out bool
+}{
+	"decreasing": {[]int{7, 6, 4, 2, 1}, true},
+	"increasing": {[]int{1, 3, 6, 7, 9}, true},
+}
 
-	if !LevelIsSafe(SafeLevel) {
-		t.Errorf(
-			`Test failed, LevelIsSafe(%d) = %t, expected %t`,
-			SafeLevel,
-			false,
-			true,
-		)
+func TestSafeLevel(t *testing.T) {
+	for name, testcase := range safelevelstests {
+		t.Run(string(name), func(t *testing.T) {
+			if LevelIsSafe(testcase.in) != testcase.out {
+				t.Errorf(
+					`Test failed, LevelIsSafe(%d) = %t, expected %t`,
+					testcase.in,
+					false,
+					true,
+				)
+			}
+		})
 	}
 }
 
@@ -56,5 +66,47 @@ func TestUnSafeLevel(t *testing.T) {
 			false,
 			true,
 		)
+	}
+}
+
+func TestUnsafeLevelDecrease(t *testing.T) {
+	var UnsafeLevel = []int{1, 2, 3, 2, 4}
+
+	if LevelIsSafe(UnsafeLevel) {
+		t.Errorf(
+			`Test failed, LevelIsSafe(%d) = %t, expected %t`,
+			UnsafeLevel,
+			false,
+			true,
+		)
+
+	}
+}
+
+func TestUnsafeLevelDecreaseTooHigh(t *testing.T) {
+	var UnsafeLevel = []int{9, 7, 6, 2, 1}
+
+	if LevelIsSafe(UnsafeLevel) {
+		t.Errorf(
+			`Test failed, LevelIsSafe(%d) = %t, expected %t`,
+			UnsafeLevel,
+			false,
+			true,
+		)
+
+	}
+}
+
+func TestUnsafeLevelIncreaseTooHigh(t *testing.T) {
+	var UnsafeLevel = []int{83, 87, 89, 90, 93, 96, 99}
+
+	if LevelIsSafe(UnsafeLevel) {
+		t.Errorf(
+			`Test failed, LevelIsSafe(%d) = %t, expected %t`,
+			UnsafeLevel,
+			false,
+			true,
+		)
+
 	}
 }

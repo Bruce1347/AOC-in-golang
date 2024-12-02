@@ -1,7 +1,21 @@
-package day2
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"math"
+	"os"
+	"strconv"
+	"strings"
+)
 
 type pair struct {
 	first, second int
+}
+
+type IntParsingError struct {
+	msg string
+	err error
 }
 
 func PairInts(input []int) (ret []pair) {
@@ -32,18 +46,84 @@ func LevelIsSafe(input []int) bool {
 	var levelsDiff []int
 
 	for _, pairing := range PairInts(input) {
-		levelsDiff = append(levelsDiff, Abs(pairing.first-pairing.second))
+		levelsDiff = append(levelsDiff, pairing.second-pairing.first)
 	}
 
-	for _, diff := range levelsDiff {
-		if diff > 3 {
+	// Before checking pairs we need to check the first value
+	if Abs(levelsDiff[0]) > 3 || levelsDiff[0] == 0 {
+		return false
+	}
+
+	// Do a 1-indexed loop to compare values two by two
+	for i := 1; i < len(levelsDiff); i++ {
+		diff := levelsDiff[i]
+
+		// If both diffs do not share the same sign then level is flucutating, thus unsafe
+		if math.Signbit(float64(diff)) != math.Signbit(float64(levelsDiff[i-1])) {
 			return false
 		}
+
+		if Abs(diff) > 0 && Abs(diff) <= 3 {
+			continue
+		}
+
+		// Discreapancy of sign between diff and the previous diff, level is unsafe
+		return false
 	}
+
+	fmt.Println(input, levelsDiff)
 
 	return true
 }
 
-func main() {
+func OpenInputFile(path string) (levels [][]int) {
+	/* Opens a file under `path` and reads its lines with the format described in the second day advent of code.
 
+	Returns a list of lists of ints.
+	*/
+
+	fp, err := os.Open(path)
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer fp.Close()
+
+	scanner := bufio.NewScanner(fp)
+
+	for scanner.Scan() {
+		// Input file has one space of separation between ints
+		var line = strings.Split(scanner.Text(), " ")
+
+		var inputs []int
+
+		for _, input := range line {
+			var parsedInt, err = strconv.ParseInt(input, 10, 64)
+
+			if err != nil {
+				panic(IntParsingError{"Int parsing failure", err})
+			}
+
+			inputs = append(inputs, int(parsedInt))
+		}
+
+		levels = append(levels, inputs)
+	}
+
+	return levels
+}
+
+func main() {
+	levels := OpenInputFile("day2.txt")
+
+	var safeLevels int
+
+	for _, level := range levels {
+		if LevelIsSafe(level) {
+			safeLevels += 1
+		}
+	}
+
+	fmt.Println("Safe levels count", safeLevels)
 }
