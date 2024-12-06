@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 )
 
-type pair struct {
-	first, second int
+type pair[T any] struct {
+	first, second T
 }
 
 type IntParsingError struct {
@@ -18,11 +19,11 @@ type IntParsingError struct {
 	err error
 }
 
-func PairInts(input []int) (ret []pair) {
+func PairInts(input []int) (ret []pair[int]) {
 	/* Pairs integers two by two in an array and returns the resulting array */
 
 	for idx, elt := range input[:len(input)-1] {
-		ret = append(ret, pair{elt, input[idx+1]})
+		ret = append(ret, pair[int]{elt, input[idx+1]})
 	}
 
 	return ret
@@ -37,7 +38,7 @@ func Abs(input int) int {
 	}
 }
 
-func LevelIsSafe(input []int) bool {
+func ReportIsSafe(input []int) bool {
 	/* Checks whether a level is safe or not
 
 	Level safety is defined by the maximum difference between two consecutive
@@ -49,31 +50,22 @@ func LevelIsSafe(input []int) bool {
 		levelsDiff = append(levelsDiff, pairing.second-pairing.first)
 	}
 
-	// Before checking pairs we need to check the first value
-	if Abs(levelsDiff[0]) > 3 || levelsDiff[0] == 0 {
-		return false
-	}
-
 	// Do a 1-indexed loop to compare values two by two
-	for i := 1; i < len(levelsDiff); i++ {
+	for i := 0; i < len(levelsDiff)-1; i++ {
 		diff := levelsDiff[i]
 
 		// If both diffs do not share the same sign then level is flucutating, thus unsafe
-		if math.Signbit(float64(diff)) != math.Signbit(float64(levelsDiff[i-1])) {
+		if math.Signbit(float64(diff)) != math.Signbit(float64(levelsDiff[i+1])) {
 			return false
 		}
 
-		if Abs(diff) > 0 && Abs(diff) <= 3 {
-			continue
+		if Abs(diff) == 0 || Abs(diff) > 3 {
+			return false
 		}
-
-		// Discreapancy of sign between diff and the previous diff, level is unsafe
-		return false
 	}
 
-	fmt.Println(input, levelsDiff)
-
-	return true
+	lastReading := Abs(levelsDiff[len(levelsDiff)-1])
+	return lastReading != 0 && lastReading <= 3
 }
 
 func OpenInputFile(path string) (levels [][]int) {
@@ -120,8 +112,21 @@ func main() {
 	var safeLevels int
 
 	for _, level := range levels {
-		if LevelIsSafe(level) {
+		safe := ReportIsSafe(level)
+		var safeReportsWithTolerance []bool
+
+		for i := 0; i < len(level); i++ {
+			copiedLevel := append([]int(nil), level...)
+
+			newSlice := append(copiedLevel[:i], copiedLevel[i+1:]...)
+
+			safeReportsWithTolerance = append(safeReportsWithTolerance, ReportIsSafe(newSlice))
+		}
+
+		if safe || slices.Contains(safeReportsWithTolerance, true) {
 			safeLevels += 1
+		} else {
+			fmt.Println("Unsafe level", level)
 		}
 	}
 

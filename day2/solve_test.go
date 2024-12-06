@@ -7,7 +7,7 @@ import (
 
 func TestPairIntsSimple(t *testing.T) {
 	var input = []int{1, 2, 3, 4}
-	var expected = []pair{pair{1, 2}, pair{2, 3}, pair{3, 4}}
+	var expected = []pair[int]{pair[int]{1, 2}, pair[int]{2, 3}, pair[int]{3, 4}}
 
 	if !reflect.DeepEqual(PairInts(input), expected) {
 		t.Errorf(
@@ -21,7 +21,7 @@ func TestPairIntsSimple(t *testing.T) {
 
 func TestPairIntsOddCount(t *testing.T) {
 	var input = []int{1, 2, 3, 4, 5}
-	var expected = []pair{pair{1, 2}, pair{2, 3}, pair{3, 4}, pair{4, 5}}
+	var expected = []pair[int]{pair[int]{1, 2}, pair[int]{2, 3}, pair[int]{3, 4}, pair[int]{4, 5}}
 
 	if !reflect.DeepEqual(PairInts(input), expected) {
 		t.Errorf(
@@ -44,7 +44,7 @@ var safelevelstests = map[string]struct {
 func TestSafeLevel(t *testing.T) {
 	for name, testcase := range safelevelstests {
 		t.Run(string(name), func(t *testing.T) {
-			if LevelIsSafe(testcase.in) != testcase.out {
+			if ReportIsSafe(testcase.in) != testcase.out {
 				t.Errorf(
 					`Test failed, LevelIsSafe(%d) = %t, expected %t`,
 					testcase.in,
@@ -59,7 +59,7 @@ func TestSafeLevel(t *testing.T) {
 func TestUnSafeLevel(t *testing.T) {
 	var SafeLevel = []int{69, 7, 6, 4, 2, 1}
 
-	if LevelIsSafe(SafeLevel) {
+	if ReportIsSafe(SafeLevel) {
 		t.Errorf(
 			`Test failed, LevelIsSafe(%d) = %t, expected %t`,
 			SafeLevel,
@@ -72,7 +72,7 @@ func TestUnSafeLevel(t *testing.T) {
 func TestUnsafeLevelDecrease(t *testing.T) {
 	var UnsafeLevel = []int{1, 2, 3, 2, 4}
 
-	if LevelIsSafe(UnsafeLevel) {
+	if ReportIsSafe(UnsafeLevel) {
 		t.Errorf(
 			`Test failed, LevelIsSafe(%d) = %t, expected %t`,
 			UnsafeLevel,
@@ -84,9 +84,9 @@ func TestUnsafeLevelDecrease(t *testing.T) {
 }
 
 func TestUnsafeLevelDecreaseTooHigh(t *testing.T) {
-	var UnsafeLevel = []int{9, 7, 6, 2, 1}
+	var UnsafeLevel = []int{15, 9, 7, 6, 2, 1}
 
-	if LevelIsSafe(UnsafeLevel) {
+	if ReportIsSafe(UnsafeLevel) {
 		t.Errorf(
 			`Test failed, LevelIsSafe(%d) = %t, expected %t`,
 			UnsafeLevel,
@@ -100,7 +100,21 @@ func TestUnsafeLevelDecreaseTooHigh(t *testing.T) {
 func TestUnsafeLevelIncreaseTooHigh(t *testing.T) {
 	var UnsafeLevel = []int{83, 87, 89, 90, 93, 96, 99}
 
-	if LevelIsSafe(UnsafeLevel) {
+	if ReportIsSafe(UnsafeLevel) {
+		t.Errorf(
+			`Test failed, LevelIsSafe(%d) = %t, expected %t`,
+			UnsafeLevel,
+			false,
+			true,
+		)
+
+	}
+}
+
+func TestUnsafeLevelDiffTooHigh(t *testing.T) {
+	var UnsafeLevel = []int{9, 7, 6, 1}
+
+	if ReportIsSafe(UnsafeLevel) {
 		t.Errorf(
 			`Test failed, LevelIsSafe(%d) = %t, expected %t`,
 			UnsafeLevel,
