@@ -95,3 +95,21 @@ func TestMixedInput(t *testing.T) {
 	}
 
 }
+
+func TestMixedInputInterruptible(t *testing.T) {
+	input := "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
+
+	expected := 2*4 + 8*5
+
+	result := ParseInput(input)
+
+	if result != expected {
+		t.Errorf(
+			`Test failed, ParseInput(%s) = %d, expected %d`,
+			input,
+			result,
+			expected,
+		)
+	}
+
+}
